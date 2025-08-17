@@ -12,12 +12,13 @@ if (Test-Path $drive) {
         try {
             $mount = Mount-DiskImage -ImagePath "$image" -PassThru
             $driveLtr = ($mount | Get-Volume).DriveLetter
-            Write-Host "`nMounted ISO. Drive letter is: $driveLtr" -ForegroundColor Yellow
+            Write-Host "`nMounted ISO. Drive letter is: ${driveLtr}:" -ForegroundColor Yellow
             Start-Sleep -Seconds 5
             cls
 
             Write-Host "Copying files, do not terminate the batch job..." -ForegroundColor Cyan
-            $xcopy = Start-Process xcopy.exe -ArgumentList "$driveLtr:\* $drive\* /H /E /F /J" -NoNewWindow -RedirectStandardOutput temp.txt -Wait
+            $xcopyArgs = "${driveLtr}:\* ${drive}\* /H /E /F /J"
+            Start-Process xcopy.exe -ArgumentList $xcopyArgs -NoNewWindow -RedirectStandardOutput temp.txt -Wait
             Get-Content temp.txt | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
             Remove-Item temp.txt -Force
             Start-Sleep -Seconds 5
@@ -35,20 +36,22 @@ if (Test-Path $drive) {
             $bios = Read-Host "Finished copying files.`nWhat is your BIOS or disk scheme to apply the boot sector on? (GPT/MBR)"
 
             if ($bios -eq "GPT") {
-                bootsect.exe /$rule $driveLtr /force
+                bootsect.exe /$rule ${driveLtr} /force
                 $efiVol = Get-Volume | Where-Object { $_.FileSystemLabel -eq "SYSTEM" }
                 if ($efiVol) {
                     $efiLetter = $efiVol.DriveLetter
-                    Write-Host "EFI volume detected as $efiLetter:`" -ForegroundColor Yellow
-                    $efiPath = "$efiLetter:\EFI"
+                    Write-Host "EFI volume detected as ${efiLetter}:" -ForegroundColor Yellow
+                    $efiPath = "${efiLetter}:\EFI"
                     if (Test-Path $efiPath) {
-                        $efiCopy = Start-Process xcopy.exe -ArgumentList "$drive:\efi\* $efiPath\* /E /F /K /H /J" -NoNewWindow -RedirectStandardOutput temp.txt -Wait
+                        $efiCopyArgs = "${drive}:\efi\* ${efiPath}\* /E /F /K /H /J"
+                        Start-Process xcopy.exe -ArgumentList $efiCopyArgs -NoNewWindow -RedirectStandardOutput temp.txt -Wait
                         Get-Content temp.txt | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
                         Remove-Item temp.txt -Force
                     } else {
                         $efiPath = Read-Host "EFI system path not found. Please provide the EFI files path (e.g., W:\EFI)" -ForegroundColor Yellow
                         if (Test-Path $efiPath) {
-                            Start-Process xcopy.exe -ArgumentList "$drive:\efi\* $efiPath\* /E /F /K /H /J" -NoNewWindow -Wait
+                            $efiCopyArgs = "${drive}:\efi\* ${efiPath}\* /E /F /K /H /J"
+                            Start-Process xcopy.exe -ArgumentList $efiCopyArgs -NoNewWindow -Wait
                         } else {
                             Write-Host "Provided EFI path is invalid." -ForegroundColor Red
                         }
@@ -57,7 +60,7 @@ if (Test-Path $drive) {
                     Write-Host "EFI volume not found." -ForegroundColor Red
                 }
             } elseif ($bios -eq "MBR") {
-                bootsect.exe /$rule $driveLtr /mbr /force
+                bootsect.exe /$rule ${driveLtr} /mbr /force
                 $volnum = (Get-Volume -DriveLetter $driveLtr | Get-Partition).PartitionNumber
                 $diskpartScript = @"
 select volume $volnum
@@ -65,7 +68,7 @@ active
 exit
 "@
                 $diskpartScript | Out-File dp.txt -Encoding ASCII
-                Start-Process diskpart.exe -ArgumentList "/s dp.txt" -Wait
+                Start-Process diskpart.exe -ArgumentList @("/s", "dp.txt") -Wait
                 Remove-Item dp.txt -Force
             } else {
                 Write-Host "Invalid scheme or system." -ForegroundColor Red
@@ -79,7 +82,7 @@ exit
         } catch {
             Write-Host "An error occurred. Cleaning up..." -ForegroundColor Red
             Dismount-DiskImage -ImagePath "$image"
-            Remove-Item "$drive\*" -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item "${drive}\*" -Recurse -Force -ErrorAction SilentlyContinue
             exit -1073741510
         }
     } else {
