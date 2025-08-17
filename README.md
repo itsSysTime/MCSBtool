@@ -8,10 +8,16 @@ This tool uses three main steps to ensure your bootable media is prepared for in
 3. Set Boot, the final step, sets your external media boot configuration and others to ensure you can boot into the flash drive or SSD.
 
 # What is the coding language of this tool?
-This tool has been primarily made for PowerShell due to efficiency.
+This tool was primarily designed for PowerShell due to its efficiency.
 
 # Credits
-Credits to me (Poireguy), I guess, yippee!
+Credit to me (Poireguy), yippee!
 
 # Extras
-Adding your own drivers has been implemented; you're welcome!
+Adding custom drivers has been implemented; you're welcome!
+More params!
+
+# Example parameter usage
+```PowerShell
+C:\Users\JohnDoe\MCSBtool> .\mcsb.ps1 -BIOS "MBR" -ISOImage "C:\Users\JohnDoe\images\Windows11.iso" -DrvPath "C:\Users\JohnDoe\MyDrivers\" -USBPath "F:\"
+```
