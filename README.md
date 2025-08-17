@@ -7,6 +7,14 @@ This tool uses three main steps to ensure your bootable media is prepared for in
 2. Copy, the second step, copies the files of the mounted image to your provided USB or other device path.
 3. Set Boot, the final step, sets your external media boot configuration and others to ensure you can boot into the flash drive or SSD.
 
+## Format your USB drive accordingly
+Due to Windows Image (.WIM) and .ESD sizes in ISOs, some USBs will be formatted accordingly. With smaller _D:\sources\install.wim_ (replace D:\ with your USB letter) or **install.esd** sizes, you should format the partition as FAT32 for compatibility between UEFI and Legacy BIOS (MBR). For larger images up to **4 Gigabytes** and above, format the drive as _NTFS_ to ensure your USB drive can boot properly with modern systems and space for your .WIM or .ESD image. I encourage formatting USB drives as so, according to OS; image sizes can vary with editions and versions.
+
+| OS                      | Format As |
+|-------------------------|-----------|
+| Windows Server 2008 R2> | FAT32     |
+| Windows Server 2012<    | NTFS      |
+
 # What is the coding language of this tool?
 This tool was primarily designed for PowerShell due to its efficiency.
 
