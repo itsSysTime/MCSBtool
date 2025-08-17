@@ -24,7 +24,7 @@ if (Test-Path $drive) {
             Start-Sleep -Seconds 5
             cls
 
-            $os = Read-Host "Is your version of Windows Vista or below? (Y/N)"
+            $os = Read-Host "Is your version of Windows below Vista? (Y/N)"
             if ($os -eq "y") {
                 $rule = "nt52"
             } else {
