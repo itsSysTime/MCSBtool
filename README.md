@@ -12,3 +12,6 @@ This tool has been primarily made for PowerShell due to efficiency.
 
 # Credits
 Credits to me (Poireguy), I guess, yippee!
+
+# Extras
+Adding your own drivers has been implemented; you're welcome!
