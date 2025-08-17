@@ -1,7 +1,9 @@
 param (
     [string]$ISOPath
-    [string]$Drivers
+    [string]$DrvPath
     [string]$USBPath
+    [string]$BIOS
+    [string]$EFIPath
 )
 
 If ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('USBPath')) {
@@ -23,7 +25,7 @@ if (Test-Path $Drive) {
     } else {
         $Image = Read-Host "Please enter the full path to your optical disk image"
     }
-
+ 
     if (Test-Path $Image) {
         try {
             $Mount = Mount-DiskImage -ImagePath "$Image" -PassThru
@@ -33,17 +35,22 @@ if (Test-Path $Drive) {
             $drvin = Read-Host "Would you like to install drivers? (Y/N)"
             
             If ($drvin.ToUpper() -eq "Y") {
-                If ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('DrvPath')) {
-                    $DrvPath = $Drivers
-                } else {
+                If (-not $PSCmdlet.MyInvocation.BoundParameters.ContainsKey('DrvPath')) {
                     $DrvPath = Read-Host "Please provide a directory containing drivers (full path)"
                 }
 
                 If (Test-Path $DrvPath) {
                     md ${Drive}:\Drivers
-                    Get-ChildItem -Path $DrvPath -Recurse -Include *.inf, *.sys, *.cat | Copy-Item -Destination "${Drive}:\Drivers" -Force
-                    Write-Host "During Setup, direct the installer to: ${Drive}:\Drivers\ to install Drivers." -ForegroundColor Green
-                } elseif ($drvpath -eq $null) {
+                    $validDrivers = Get-ChildItem -Path $DrvPath -Recurse -Include *.inf, *.sys, *.cat
+if ($validDrivers.Count -gt 0) {
+    md "${Drive}:\Drivers"
+    $validDrivers | Copy-Item -Destination "${Drive}:\Drivers" -Force
+    Write-Host "Drivers copied successfully. During Setup, direct the installer to: ${Drive}:\Drivers\ to install these drivers." -ForegroundColor Green
+} else {
+    Write-Host "No valid driver files found in $DrvPath." -ForegroundColor Yellow
+}
+
+                } elseif ($DrvPath -eq $null) {
                     Write-Host "Drivers will not be added to your installation." -ForegroundColor Yellow
                 }
             cls
@@ -56,8 +63,8 @@ if (Test-Path $Drive) {
             Start-Sleep -Seconds 5
             cls
 
-            $os = Read-Host "Is your version of Windows below Vista? (Y/N)"
-            if ($os.ToUpper() -eq "Y") {
+            $OS = Read-Host "Is your version of Windows below Vista? (Y/N)"
+            if ($OS.ToUpper() -eq "Y") {
                 $rule = "nt52"
             } else {
                 $rule = "nt60"
@@ -65,24 +72,27 @@ if (Test-Path $Drive) {
 
             Start-Sleep -Seconds 5
             cls
-            $bios = Read-Host "Finished copying files.`nWhat is your BIOS or disk scheme to apply the boot sector on? (GPT/MBR)"
+          
+            If (-not $PSCmdlet.MyInvocation.BoundParameters.ContainsKey('BIOS')) {
+                $BIOS = Read-Host "Finished copying files.`nWhat is your BIOS or disk scheme to apply the boot sector on? (GPT/MBR)"
+            }
 
-            if ($bios.ToUpper() -eq "GPT") {
+            if ($BIOS.ToUpper() -eq "GPT") {
                 bootsect.exe /$rule ${DriveLtr} /force
-                $efiVol = Get-Volume | Where-Object { $_.FileSystemLabel -eq "SYSTEM" }
-                if ($efiVol) {
-                    $efiLetter = $efiVol.DriveLetter
-                    Write-Host "EFI volume detected as ${efiLetter}:" -ForegroundColor Yellow
-                    $efiPath = "${efiLetter}:\EFI"
-                    if (Test-Path $efiPath) {
-                        $efiCopyArgs = "${Drive}:\efi\* ${efiPath}\* /E /F /K /H /J"
+                $EFIVol = Get-Volume | Where-Object { $_.FileSystemLabel -eq "SYSTEM" }
+                if ($EFIVol) {
+                    $EFILtr = $EFIVol.DriveLetter
+                    Write-Host "EFI volume detected as ${EFILtr}:" -ForegroundColor Yellow
+                    $EFIPath = "${EFILtr}:\EFI"
+                    if (Test-Path $EFIPath) {
+                        $efiCopyArgs = "${Drive}:\efi\* ${EFIPath}\* /E /F /K /H /J"
                         Start-Process xcopy.exe -ArgumentList $efiCopyArgs -NoNewWindow -RedirectStandardOutput temp.txt -Wait
                         Get-Content temp.txt | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
                         Remove-Item temp.txt -Force
                     } else {
-                        $efiPath = Read-Host "EFI system path not found. Please provide the EFI files path (e.g., W:\EFI)"
-                        if (Test-Path $efiPath) {
-                            $efiCopyArgs = "${Drive}:\efi\* ${efiPath}\* /E /F /K /H /J"
+                        $EFIPath = Read-Host "EFI system path not found. Please provide the EFI files path (e.g., W:\EFI)"
+                        if (Test-Path $EFIPath) {
+                            $efiCopyArgs = "${Drive}:\efi\* ${EFIPath}\* /E /F /K /H /J"
                             Start-Process xcopy.exe -ArgumentList $efiCopyArgs -NoNewWindow -Wait
                         } else {
                             Write-Host "Provided EFI path is invalid." -ForegroundColor Red
@@ -91,7 +101,7 @@ if (Test-Path $Drive) {
                 } else {
                     Write-Host "EFI volume not found." -ForegroundColor Red
                 }
-            } elseif ($bios -eq "MBR") {
+            } elseif ($BIOS -eq "MBR") {
                 bootsect.exe /$rule ${DriveLtr} /mbr /force
                 $volnum = (Get-Volume -DriveLetter $DriveLtr | Get-Partition).PartitionNumber
                 $diskpartScript = @"
