@@ -15,9 +15,10 @@ function Invoke-Drivers {
     if (Test-Path $DrvPath) {
         $validDrivers = Get-ChildItem -Path $DrvPath -Recurse -Include *.inf, *.sys, *.cat
         if ($validDrivers.Count -gt 0) {
-            md "${Drive}\Drivers" -Force | Out-Null
-            $validDrivers | Copy-Item -Destination "${Drive}\Drivers" -Force
-            Write-Host "Drivers copied successfully.`nDirect Setup to install drivers from the directory: ${Drive}\Drivers\" -ForegroundColor Green
+            $SentTo = Join-Path $Drive "Drivers"
+            md $SentTo
+            $validDrivers | Copy-Item -Destination "$SentTo" -Force
+            Write-Host "Drivers copied successfully.`nDirect Setup to install drivers from the directory: $SentTo" -ForegroundColor Green
             Log "Drivers successfully copied: $($validDrivers.Count)"
         } else {
             Write-Host "No valid driver files found." -ForegroundColor Yellow
