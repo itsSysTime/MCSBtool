@@ -1,7 +1,7 @@
 $drive = Read-Host @"
 Welcome to the Automated MCS/MCSB Tool for creating bootable media.
 To get started, please enter the drive letter to your USB or other insertable device (e.g., R:\)
-"@ -ForegroundColor Green
+"@
 
 Write-Host "`nVerifying drive, please wait..." -ForegroundColor Cyan
 
@@ -48,7 +48,7 @@ if (Test-Path $drive) {
                         Get-Content temp.txt | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
                         Remove-Item temp.txt -Force
                     } else {
-                        $efiPath = Read-Host "EFI system path not found. Please provide the EFI files path (e.g., W:\EFI)" -ForegroundColor Yellow
+                        $efiPath = Read-Host "EFI system path not found. Please provide the EFI files path (e.g., W:\EFI)"
                         if (Test-Path $efiPath) {
                             $efiCopyArgs = "${drive}:\efi\* ${efiPath}\* /E /F /K /H /J"
                             Start-Process xcopy.exe -ArgumentList $efiCopyArgs -NoNewWindow -Wait
