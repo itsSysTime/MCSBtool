@@ -15,7 +15,7 @@ Credit to me (Poireguy), yippee!
 
 # Extras
 Adding custom drivers has been implemented; you're welcome!
-More params!
+More parameters, but these parameters are optional.
 
 # Example parameter usage
 ```PowerShell
