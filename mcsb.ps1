@@ -14,6 +14,18 @@ if (Test-Path $drive) {
             $driveLtr = ($mount | Get-Volume).DriveLetter
             Write-Host "`nMounted ISO. Drive letter is: ${driveLtr}:" -ForegroundColor Yellow
             Start-Sleep -Seconds 5
+            $drvin = Read-Host "Would you like to install drivers? (Y/N)"
+            
+            If ($drvin.ToUpper() -eq "y") {
+                $drvpath = Read-Host "Please provide a directory containing drivers (full path)"
+                
+                If (Test-Path $drvpath) {
+                    md ${drive}:\Drivers
+                    Get-ChildItem -Path $drvpath -Recurse -Include *.inf, *.sys, *.cat | Copy-Item -Destination "${drive}:\Drivers" -Force
+                    Write-Host "During Setup, direct the installer to: ${drive}:\Drivers\ to install drivers." -ForegroundColor Green
+                } elseif ($drvpath -eq $null) {
+                    Write-Host "Drivers will not be added to your installation." -ForegroundColor Yellow
+                }
             cls
 
             Write-Host "Copying files, do not terminate the batch job..." -ForegroundColor Cyan
@@ -25,7 +37,7 @@ if (Test-Path $drive) {
             cls
 
             $os = Read-Host "Is your version of Windows below Vista? (Y/N)"
-            if ($os -eq "y") {
+            if ($os.ToUpper() -eq "y") {
                 $rule = "nt52"
             } else {
                 $rule = "nt60"
@@ -35,7 +47,7 @@ if (Test-Path $drive) {
             cls
             $bios = Read-Host "Finished copying files.`nWhat is your BIOS or disk scheme to apply the boot sector on? (GPT/MBR)"
 
-            if ($bios -eq "GPT") {
+            if ($bios.ToUpper() -eq "GPT") {
                 bootsect.exe /$rule ${driveLtr} /force
                 $efiVol = Get-Volume | Where-Object { $_.FileSystemLabel -eq "SYSTEM" }
                 if ($efiVol) {
