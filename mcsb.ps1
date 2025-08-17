@@ -28,7 +28,7 @@ Log "=== MCSB Session Started ==="
 
 if ($MyInvocation.BoundParameters.ContainsKey('USBPath')) {
     $Drive = $USBPath
-    $Drive = $Drive.TrimEnd(':\')
+    $Drive = $Drive.TrimEnd('\')
 } else {
     $Drive = Read-Host @"
 Welcome to the Automated MCS/MCSB Tool for creating bootable media.
@@ -39,13 +39,13 @@ To get started, please enter the drive letter to your USB or other insertable de
 Write-Host "`nVerifying drive, please wait..." -ForegroundColor Cyan
 Log "Drive input: $Drive"
 
-if (-not ${Drive}:\) {
+if (-not $Drive) {
     Write-Host "Drive path is null or empty." -ForegroundColor Red
     Log "Drive path was null."
     exit 1
 }
 
-if (Test-Path ${Drive}:\) {
+if (Test-Path $Drive) {
     cls
 
     if ($MyInvocation.BoundParameters.ContainsKey('ISOPath')) {
@@ -81,9 +81,9 @@ if (Test-Path ${Drive}:\) {
                 if (Test-Path $DrvPath) {
                     $validDrivers = Get-ChildItem -Path $DrvPath -Recurse -Include *.inf, *.sys, *.cat
                     if ($validDrivers.Count -gt 0) {
-                        md "${Drive}:\Drivers"
-                        $validDrivers | Copy-Item -Destination "${Drive}:\Drivers" -Force
-                        Write-Host "Drivers copied successfully.`nDirect Setup to install drivers from the directory: ${Drive}:\Drivers\" -ForegroundColor Green
+                        md "${Drive}\Drivers"
+                        $validDrivers | Copy-Item -Destination "${Drive}\Drivers" -Force
+                        Write-Host "Drivers copied successfully.`nDirect Setup to install drivers from the directory: ${Drive}\Drivers\" -ForegroundColor Green
                         Log "Drivers copied: $($validDrivers.Count)"
                     } else {
                         Write-Host "No valid driver files found." -ForegroundColor Yellow
@@ -125,7 +125,7 @@ if (Test-Path ${Drive}:\) {
                     $EFILtr = $EFIVol.DriveLetter
                     $EFIPath = "${EFILtr}:\EFI"
                     if (Test-Path $EFIPath) {
-                        $efiCopyArgs = "${Drive}:\efi\* ${EFIPath}\* /E /F /K /H /J"
+                        $efiCopyArgs = "${Drive}\efi\* ${EFIPath}\* /E /F /K /H /J"
                         Start-Process xcopy.exe -ArgumentList $efiCopyArgs -NoNewWindow -RedirectStandardOutput temp.txt -Wait
                         Get-Content temp.txt | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
                         Remove-Item temp.txt -Force
@@ -133,7 +133,7 @@ if (Test-Path ${Drive}:\) {
                     } else {
                         $EFIPath = Read-Host "EFI system path not found. Provide manually:"
                         if (Test-Path $EFIPath) {
-                            $efiCopyArgs = "${Drive}:\efi\* ${EFIPath}\* /E /F /K /H /J"
+                            $efiCopyArgs = "${Drive}\efi\* ${EFIPath}\* /E /F /K /H /J"
                             Start-Process xcopy.exe -ArgumentList $efiCopyArgs -NoNewWindow -Wait
                             Log "Manual EFI copy to $EFIPath"
                         } else {
@@ -181,6 +181,6 @@ exit
     }
 } else {
     Write-Host "Your drive was not found." -ForegroundColor Red
-    Log "Drive not found at ${Drive}:\"
+    Log "Drive not found at ${Drive}\"
     pause
 }
