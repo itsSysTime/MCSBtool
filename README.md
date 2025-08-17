@@ -15,7 +15,11 @@ Credit to me (Poireguy), yippee!
 
 # Extras
 Adding custom drivers has been implemented; you're welcome!
-More parameters, but these parameters are optional.
+<br>More parameters, but these parameters are optional.
+
+Let your .inf, .sys, and .cat files join the installation. Sure, you can also implement the
+drivers into the install.wim/install.esd and boot.wim images, however, this takes time and can take up
+excessive storage.
 
 # Example parameter usage
 ```PowerShell
