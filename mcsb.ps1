@@ -16,7 +16,7 @@ if (Test-Path $drive) {
             Start-Sleep -Seconds 5
             $drvin = Read-Host "Would you like to install drivers? (Y/N)"
             
-            If ($drvin.ToUpper() -eq "y") {
+            If ($drvin.ToUpper() -eq "Y") {
                 $drvpath = Read-Host "Please provide a directory containing drivers (full path)"
                 
                 If (Test-Path $drvpath) {
@@ -37,7 +37,7 @@ if (Test-Path $drive) {
             cls
 
             $os = Read-Host "Is your version of Windows below Vista? (Y/N)"
-            if ($os.ToUpper() -eq "y") {
+            if ($os.ToUpper() -eq "Y") {
                 $rule = "nt52"
             } else {
                 $rule = "nt60"
