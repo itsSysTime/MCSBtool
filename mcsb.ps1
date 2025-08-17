@@ -6,6 +6,30 @@ param (
     [string]$EFIPath
 )
 
+function Invoke-Drivers {
+    param (
+        [string]$DrvPath,
+        [string]$Drive
+    )
+
+    if (Test-Path $DrvPath) {
+        $validDrivers = Get-ChildItem -Path $DrvPath -Recurse -Include *.inf, *.sys, *.cat
+        if ($validDrivers.Count -gt 0) {
+            md "${Drive}\Drivers" -Force | Out-Null
+            $validDrivers | Copy-Item -Destination "${Drive}\Drivers" -Force
+            Write-Host "Drivers copied successfully.`nDirect Setup to install drivers from the directory: ${Drive}\Drivers\" -ForegroundColor Green
+            Log "Drivers successfully copied: $($validDrivers.Count)"
+        } else {
+            Write-Host "No valid driver files found." -ForegroundColor Yellow
+            Log "No valid drivers found. Drivers will not be installed."
+        }
+    } else {
+        Write-Host "Driver path invalid." -ForegroundColor Yellow
+        Log "Driver path invalid."
+    }
+}
+
+
 # Ensure script is run as admin
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "Elevating script to Administrator..." -ForegroundColor Cyan
@@ -58,52 +82,56 @@ if (Test-Path $Drive) {
 
     if (Test-Path $Image) {
         try {
-            Log "Attempting to mount ISO..."
-            $Mount = Mount-DiskImage -ImagePath "$Image" -PassThru
-            $DriveLtr = ($Mount | Get-Volume).DriveLetter
+            $DriveInfo = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq $Drive}
+            If ($DriveInfo.DriveType -ne 5) {
+                Log "Attempting to mount ISO..."
+                $Mount = Mount-DiskImage -ImagePath "$Image" -PassThru
+                $DriveLtr = ($Mount | Get-Volume).DriveLetter
 
-            if (-not $DriveLtr) {
-                throw "ISO could not mount."
-            }
-
-            Write-Host "`nMounted ISO. Drive letter is: ${DriveLtr}:" -ForegroundColor Yellow
-            Log "Mounted ISO at ${DriveLtr}:"
-            Start-Sleep -Seconds 5
-
-            $drvin = Read-Host "Would you like to install drivers? (Y/N)"
-            if ($drvin.ToUpper() -eq "Y") {
-                if (-not $MyInvocation.BoundParameters.ContainsKey('DrvPath')) {
-                    $DrvPath = Read-Host "Please provide a directory containing drivers (full path)"
+                if (-not $DriveLtr) {
+                    throw "ISO could not mount."
                 }
 
-                Log "Driver path: $DrvPath"
+                Write-Host "`nMounted ISO. Drive letter is: ${DriveLtr}:" -ForegroundColor Yellow
+                Log "Mounted ISO at ${DriveLtr}:"
+                Start-Sleep -Seconds 5
+            } else {
+                Write-Host "CD/DVD detected, proceed with optical disc steps." -ForegroundColor Cyan
+                Start-Sleep -Seconds 2
+            }
+            
 
-                if (Test-Path $DrvPath) {
-                    $validDrivers = Get-ChildItem -Path $DrvPath -Recurse -Include *.inf, *.sys, *.cat
-                    if ($validDrivers.Count -gt 0) {
-                        md "${Drive}\Drivers"
-                        $validDrivers | Copy-Item -Destination "${Drive}\Drivers" -Force
-                        Write-Host "Drivers copied successfully.`nDirect Setup to install drivers from the directory: ${Drive}\Drivers\" -ForegroundColor Green
-                        Log "Drivers copied: $($validDrivers.Count)"
-                    } else {
-                        Write-Host "No valid driver files found." -ForegroundColor Yellow
-                        Log "No valid drivers found. Drivers will not be installed."
+            cls
+            If ($DriveInfo.DriveType -ne 5) {
+                Write-Host "Copying files, please wait..." -ForegroundColor Cyan
+                $xcopyArgs = "${DriveLtr}:\* ${Drive}\* /H /E /F /J"
+                Log "xcopy args: $xcopyArgs"
+                Start-Process xcopy.exe -ArgumentList $xcopyArgs -NoNewWindow -RedirectStandardOutput temp.txt -Wait
+                Get-Content temp.txt | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
+                Remove-Item temp.txt -Force
+                Start-Sleep -Seconds 5
+                cls
+            } elseif ($DriveInfo.DriveType -eq 5) {
+                Write-Host "Burning to CD/DVD, please wait..." -ForegroundColor Yellow
+                $ibargs = "/d ${Drive} ${Image}"
+                Start-Process isoburn.exe -ArgumentList $ibargs -NoNewWindow -RedirectStandardOutput temp.txt -Wait
+                Get-Content temp.txt | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
+                Remove-Item temp.txt -Force
+                Start-Sleep -Seconds 5
+                cls
+            }
+
+                $DrvIn = Read-Host "Would you like to install drivers? (Y/N)"
+                if ($DrvIn.ToUpper() -eq "Y") {
+                    if (-not $MyInvocation.BoundParameters.ContainsKey('DrvPath')) {
+                        $DrvPath = Read-Host "Please provide a directory containing drivers (full path)"
                     }
+                    Log "Driver path: $DrvPath"
+                    Invoke-Drivers -DrvPath $DrvPath -Drive $Drive
                 } else {
-                    Write-Host "Driver path invalid." -ForegroundColor Yellow
-                    Log "Driver path invalid."
+                    Write-Host "Drivers will be skipped, proceeding forward.." -ForegroundColor Yellow
+                    Log "Drivers are not provided or skipped."
                 }
-            }
-
-            cls
-            Write-Host "Copying files..." -ForegroundColor Cyan
-            $xcopyArgs = "${DriveLtr}:\* ${Drive}\* /H /E /F /J"
-            Log "xcopy args: $xcopyArgs"
-            Start-Process xcopy.exe -ArgumentList $xcopyArgs -NoNewWindow -RedirectStandardOutput temp.txt -Wait
-            Get-Content temp.txt | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
-            Remove-Item temp.txt -Force
-            Start-Sleep -Seconds 5
-            cls
 
             $OS = Read-Host "Is your version of Windows below Vista? (Y/N)"
             $rule = if ($OS.ToUpper() -eq "Y") { "nt52" } else { "nt60" }
