@@ -39,13 +39,13 @@ To get started, please enter the drive letter to your USB or other insertable de
 Write-Host "`nVerifying drive, please wait..." -ForegroundColor Cyan
 Log "Drive input: $Drive"
 
-if (-not $Drive) {
+if (-not ${Drive}:\) {
     Write-Host "Drive path is null or empty." -ForegroundColor Red
     Log "Drive path was null."
     exit 1
 }
 
-if (Test-Path $Drive) {
+if (Test-Path ${Drive}:\) {
     cls
 
     if ($MyInvocation.BoundParameters.ContainsKey('ISOPath')) {
@@ -181,6 +181,6 @@ exit
     }
 } else {
     Write-Host "Your drive was not found." -ForegroundColor Red
-    Log "Drive not found at $Drive"
+    Log "Drive not found at ${Drive}:\"
     pause
 }
