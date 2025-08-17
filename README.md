@@ -21,6 +21,10 @@ Let your .inf, .sys, and .cat files join the installation. Sure, you can also im
 drivers into the install.wim/install.esd and boot.wim images, however, this takes time and can take up
 excessive storage.
 
+## What about CDs and DVDs?
+The support for CDs and DVDs with isoburn.exe has been added in the recent commit _6e7bdaf
+_. So, enjoy!
+
 # Example parameter usage
 ```PowerShell
 C:\Users\JohnDoe\MCSBtool> .\mcsb.ps1 -BIOS "MBR" -ISOImage "C:\Users\JohnDoe\images\Windows11.iso" -DrvPath "C:\Users\JohnDoe\MyDrivers\" -USBPath "F:\"
