@@ -37,3 +37,6 @@ _. So, enjoy!
 ```PowerShell
 C:\Users\JohnDoe\MCSBtool> .\mcsb.ps1 -BIOS "MBR" -ISOImage "C:\Users\JohnDoe\images\Windows11.iso" -DrvPath "C:\Users\JohnDoe\MyDrivers\" -USBPath "F:\"
 ```
+
+# What am I working on?
+Currently, I'm extending UEFI support by using UEFI-NTFS drivers and more from Rufus, with credits to the Rufus developers.
