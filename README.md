@@ -12,7 +12,7 @@ Due to Windows Image (.WIM) and .ESD sizes in ISOs, some USBs will be formatted 
 
 | OS                      | Format As |
 |-------------------------|-----------|
-| Windows Server 2008 R2> | FAT32     |
+| Windows 7 SP1>          | FAT32     |
 | Windows Server 2012<    | NTFS      |
 
 # What is the coding language of this tool?
