@@ -30,13 +30,13 @@ drivers into the install.wim/install.esd and boot.wim images, however, this take
 excessive storage.
 
 ## What about CDs and DVDs?
-The support for CDs and DVDs with isoburn.exe has been added in the recent commit _6e7bdaf
-_. So, enjoy!
+The support for CDs and DVDs with isoburn.exe has been added in the recent commit _6e7bdaf_. So, enjoy!
 
 # Example parameter usage
 ```PowerShell
-C:\Users\JohnDoe\MCSBtool> .\mcsb.ps1 -BIOS "MBR" -ISOImage "C:\Users\JohnDoe\images\Windows11.iso" -DrvPath "C:\Users\JohnDoe\MyDrivers\" -USBPath "F:\"
+C:\Users\JohnDoe\MCSBtool> .\mcsb.ps1 -BIOS "UEFI" -ISOImage "C:\Users\JohnDoe\images\Windows11.iso" -DrvPath "C:\Users\JohnDoe\MyDrivers\" -USBPath "F:\"
 ```
 
-# What am I working on?
-Currently, I'm extending UEFI support by using UEFI-NTFS drivers and more from Rufus, with credits to the Rufus developers.
+# UEFI/NTFS/exFAT Support
+Extended UEFI support is a major change that has been added in the commit _[7f13f7](https://github.com/poireguy/MCSBtool/commit/7f13f703a8c1625ab0a861c866b59e62f46ba2ed)_.
+A re-formatted optical disc image (copied over from Rufus's FAT12 .img file) has been added to the root of the repository; you can install this with the script in case of offline media creation.
