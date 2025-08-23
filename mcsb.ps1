@@ -1,3 +1,4 @@
+
 param (
     [string]$ISOPath,
     [string]$DrvPath,
@@ -83,7 +84,7 @@ if (Test-Path $Drive) {
 
     if (Test-Path $Image) {
         try {
-            $DriveInfo = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq $Drive}
+            $DriveInfo = Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object { $_.DeviceID -eq $Drive }
             If ($DriveInfo.DriveType -ne 5) {
                 Log "Attempting to mount ISO..."
                 $Mount = Mount-DiskImage -ImagePath "$Image" -PassThru
@@ -136,45 +137,71 @@ if (Test-Path $Drive) {
 
             $OS = Read-Host "Is your version of Windows below Vista? (Y/N)"
             $rule = if ($OS.ToUpper() -eq "Y") { "nt52" } else { "nt60" }
+            If ($OS -eq "Y") {
+                Write-Host "While this generally applies to versions Vista and below, it is also advised to enable CSM or use CSMWrap for Windows 7 and below on UEFI systems." -ForegroundColor Yellow
+            }
+            
             Log "Boot code: $rule"
 
             Start-Sleep -Seconds 5
             cls
 
             if (-not $MyInvocation.BoundParameters.ContainsKey('BIOS')) {
-                $BIOS = Read-Host "Finished copying files.`nWhat is your BIOS or disk scheme? (GPT/MBR)"
+                $BIOS = Read-Host "Finished copying files.`nWhat is your BIOS or disk scheme? (UEFI/BIOS)"
             }
 
             Log "BIOS scheme: $BIOS"
 
-            if ($BIOS.ToUpper() -eq "GPT") {
+            if ($BIOS.ToUpper() -eq "UEFI") {
+
                 bootsect.exe /$rule ${DriveLtr} /force
-                $EFIVol = Get-Volume | Where-Object { $_.FileSystemLabel -eq "SYSTEM" }
-                if ($EFIVol) {
-                    $EFILtr = $EFIVol.DriveLetter
-                    $EFIPath = "${EFILtr}:\EFI"
-                    if (Test-Path $EFIPath) {
-                        $efiCopyArgs = "${Drive}\efi\* ${EFIPath}\* /E /F /K /H /J"
-                        Start-Process xcopy.exe -ArgumentList $efiCopyArgs -NoNewWindow -RedirectStandardOutput temp.txt -Wait
-                        Get-Content temp.txt | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
-                        Remove-Item temp.txt -Force
-                        Log "EFI files copied to $EFIPath"
+                $EFID = Join-Path -Path "$PSScriptRoot" -ChildPath "EFI"
+                $ActualDriver = Join-Path -Path "$EFID" -ChildPath "uefi-ntfs.iso"
+                Write-Host "Fetching online UEFI:NTFS and other driver patches, please wait..." -ForegroundColor Cyan
+                try {
+                    Invoke-WebRequest -Uri "https://github.com/poireguy/MCSBtool/raw/refs/heads/main/uefi-ntfs.iso" -OutFile $ActualDriver -DisableKeepAlive
+                } catch {
+                    $ActualDriver = Read-Host "Fetching files failed.`nPlease provide the path to your offline copy of the drivers image"
+                    If (Test-Path $ActualDriver) {
+                        Write-Host "The script will proceed forward." -ForegroundColor Green
                     } else {
-                        $EFIPath = Read-Host "EFI system path not found. Provide manually:"
-                        if (Test-Path $EFIPath) {
-                            $efiCopyArgs = "${Drive}\efi\* ${EFIPath}\* /E /F /K /H /J"
-                            Start-Process xcopy.exe -ArgumentList $efiCopyArgs -NoNewWindow -Wait
-                            Log "Manual EFI copy to $EFIPath"
-                        } else {
-                            Write-Host "Provided EFI path is invalid." -ForegroundColor Red
-                            Log "Invalid EFI path provided."
-                        }
+                        Write-Host "The following path could not be resolved: ${ActualDriver}" -ForegroundColor Red
+                        return
                     }
-                } else {
-                    Write-Host "EFI volume not found." -ForegroundColor Red
-                    Log "EFI volume not found."
                 }
-            } elseif ($BIOS.ToUpper() -eq "MBR") {
+
+                $Ltrs = [char[]]([int][char]'C'..[int][char]'Z') 
+                $Used = (Get-PSDrive -PSProvider FileSystem).Name
+                $UnusedLtrs = $Ltrs | Where-Object { $_ -notin $Used }
+                $RandLtr = Get-Random -InputObject $UnusedLtrs
+                $DrvEx = ($Drive -replace ':', '') -replace '\\', ''
+                $DrivePart = Get-Partition -DriveLetter $DrvEx
+                $Disk = Get-Disk -Number $DrivePart.DiskNumber
+
+                Write-Host "Your EFI partition will use the letter: $RandLtr"
+                $dpScr = @"
+sel dis $Disk
+create par primary size=272
+format fs=fat32 quick
+set id=EF OVERRIDE
+exit
+"@
+                $dpOut = Join-Path -Path "$PSScriptRoot" -ChildPath "dpOutput.log"
+                $dpScr | diskpart.exe | Out-File $dpOut -Encoding ASCII
+                Start-Process diskpart.exe -ArgumentList "/s", $dpOut -Wait
+                $MountDrivers = Mount-DiskImage "$ActualDriver" -PassThru
+                $MoDrLtr = ($MountDrivers | Get-Volume).DriveLetter
+                $rcArgs = "`"${MoDrLtr}:`" `"${RandLtr}:`" /E /MIR /CopyAll /J /R:1 /W:1"
+                Log "Downloading EFI files from local web copy..."
+
+                Log "Mounted EFI drivers at: $MoDrLtr"
+                $robolog = Join-Path -Path "$PSScriptRoot" -ChildPath "mcsb.robocopy.log" 
+                Start-Process robocopy.exe -ArgumentList $rcArgs -RedirectStandardOutput $robolog -Wait
+                $RoboCon = Get-Content -Path "$robolog"
+                Log "Copied EFI files: $RoboCon"
+                Write-Host "$RoboCon" -ForegroundColor Yellow
+
+            } elseif ($BIOS.ToUpper() -eq "BIOS") {
                 bootsect.exe /$rule ${DriveLtr} /mbr /force
                 $volnum = (Get-Volume -DriveLetter $DriveLtr | Get-Partition).PartitionNumber
                 $diskpartScript = @"
