@@ -40,3 +40,7 @@ C:\Users\JohnDoe\MCSBtool> .\mcsb.ps1 -BIOS "UEFI" -ISOImage "C:\Users\JohnDoe\i
 # UEFI/NTFS/exFAT Support
 Extended UEFI support is a major change that has been added in the commit _[7f13f7](https://github.com/poireguy/MCSBtool/commit/7f13f703a8c1625ab0a861c866b59e62f46ba2ed)_.
 A re-formatted optical disc image (copied over from Rufus's FAT12 .img file) has been added to the root of the repository; you can install this with the script in case of offline media creation.
+
+# Work In Progress and new potential features
+I am planning to add these things to commit(s) for the _MCSB Tool_ PowerShell script:
+- Add a file size check for install.wim on the mounted ISO drive BEFORE the copying files step, but only if the USB is formatted as FAT32. If over 4 GiB (or simplify to 3.7 GiB) was verified as the file size from the UDF-mounted drive, prompt to split the file into 2-3 versions (mounted drives are only read, so prompt the user for a directory to store these files temporarily and then proceed to write these after the copying process by deleting install.wim, if *.swm is present in %TMP% and copy these .swm files to **USB**:\sources\. This might be an extensive process with DISM.exe
