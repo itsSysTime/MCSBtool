@@ -12,8 +12,8 @@ Due to Windows Image (.WIM) and .ESD sizes in ISOs, some USBs will be formatted 
 
 | OS                      | Format As |
 |-------------------------|-----------|
-| Windows 7 SP1>          | FAT32     |
-| Windows Server 2012<    | NTFS      |
+| Windows 7 SP1 and older | FAT32     |
+| Windows Server 2012 and newer    | NTFS      |
 
 # What is the coding language of this tool?
 This tool was primarily designed for PowerShell due to its efficiency.
