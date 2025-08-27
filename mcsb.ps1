@@ -16,10 +16,16 @@ function Invoke-Drivers {
     if (Test-Path $DrvPath) {
         $validDrivers = Get-ChildItem -Path $DrvPath -Recurse -Include *.inf, *.sys, *.cat
         if ($validDrivers.Count -gt 0) {
-            $SentTo = Join-Path $Drive "Drivers"
+            $SentTo = Join-Path $Drive "$WinPEDriver$"
+            $FallBack = Join-Path $Drive "EXEDrv"
             md $SentTo
             $validDrivers | Copy-Item -Destination "$SentTo" -Force
-            Write-Host "Drivers copied successfully.`nDirect Setup to install drivers from the directory: $SentTo" -ForegroundColor Green
+            Write-Host "Drivers copied successfully.`nThose copied to the directory will be mounted as Setup, or Windows PE, boots." -ForegroundColor Green
+            if (Get-ChildItem -Path $DrvPath -Filter "*.exe" -File -ErrorAction SilentlyContinue) {
+                md $FallBack
+                Write-Host ".EXE files or installers were detected.`nIn order to install these drivers, you must either extract the driver files OR install these after the device your bootable media uses is set up." -ForegroundColor Yellow
+            }
+
             Log "Drivers successfully copied: $($validDrivers.Count)"
         } else {
             Write-Host "No valid driver files found." -ForegroundColor Yellow
@@ -136,25 +142,25 @@ if (Test-Path $Drive) {
                 }
 
             $OS = Read-Host "Is your version of Windows below Vista? (Y/N)"
-            $rule = if ($OS.ToUpper() -eq "Y") { "nt52" } else { "nt60" }
+            $code = if ($OS.ToUpper() -eq "Y") { "nt52" } else { "nt60" }
             If ($OS -eq "Y") {
                 Write-Host "While this generally applies to versions Vista and below, it is also advised to enable CSM or use CSMWrap for Windows 7 and below on UEFI systems." -ForegroundColor Yellow
             }
             
-            Log "Boot code: $rule"
+            Log "Boot code: $code"
 
             Start-Sleep -Seconds 5
             cls
 
             if (-not $MyInvocation.BoundParameters.ContainsKey('BIOS')) {
-                $BIOS = Read-Host "Finished copying files.`nWhat is your BIOS or disk scheme? (UEFI/BIOS)"
+                $BIOS = Read-Host "Finished copying files.`nWhat does your system run on? (UEFI/BIOS)"
             }
 
             Log "BIOS scheme: $BIOS"
 
             if ($BIOS.ToUpper() -eq "UEFI") {
 
-                bootsect.exe /$rule ${DriveLtr} /force
+                bootsect.exe /$code ${Drive} /force
                 $EFID = Join-Path -Path "$PSScriptRoot" -ChildPath "EFI"
                 $ActualDriver = Join-Path -Path "$EFID" -ChildPath "uefi-ntfs.iso"
                 Write-Host "Fetching online UEFI:NTFS and other driver patches, please wait..." -ForegroundColor Cyan
@@ -202,8 +208,8 @@ exit
                 Write-Host "$RoboCon" -ForegroundColor Yellow
 
             } elseif ($BIOS.ToUpper() -eq "BIOS") {
-                bootsect.exe /$rule ${DriveLtr} /mbr /force
-                $volnum = (Get-Volume -DriveLetter $DriveLtr | Get-Partition).PartitionNumber
+                bootsect.exe /$code ${Drive} /mbr /force
+                $volnum = (Get-Volume -DriveLetter $Drive | Get-Partition).PartitionNumber
                 $diskpartScript = @"
 select volume $volnum
 active
@@ -240,3 +246,4 @@ exit
     Log "Drive not found at ${Drive}\"
     pause
 }
+
