@@ -43,11 +43,13 @@ In order is where you perform these steps. However, this process assumes you hav
 - Version of OS to install. The process assumes you acknowledge what you need to install the OS. Check online for more information!
 - ISO or optical disc image file. The process assumes you have this to proceed.
 
+Because of the script's intended view on Microsoft Windows, manual steps may need to be performed for other OSes.
+
 Now, you can proceed with the steps in the specified order:
 1. Mount your image file
 2. Copy the files inside the newly mounted virtual drive to your USB/CD/DVD drive.
 3. Make sure your information is correct. The disk scheme and firmware are also detailed for more legacy OSes. GPT and legacy BIOS are not natively compatible, as well as MBR and UEFI.
-4. Finally, set boot information such as boot entries, boot code (for Windows), and other vital information based on your operating system and system type.
+4. Finally, set and apply boot information such as boot entries, boot code (for Windows), and other vital information based on your operating system and system type.
 
 
 # Extended file system support on UEFI systems
