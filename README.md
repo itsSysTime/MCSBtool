@@ -22,7 +22,7 @@ This tool was primarily designed for PowerShell due to its efficiency.
 Credit to me (Poireguy), yippee!
 
 # Extras
-Adding custom drivers has been implemented; you're welcome!
+Adding custom drivers has been implemented; you're welcome! `$WinPEDriver$` path has been added to automatically mount or load drivers on WinPE/Setup boot.
 <br>More parameters, but these parameters are optional.
 
 Let your .inf, .sys, and .cat files join the installation. Sure, you can also implement the
@@ -37,10 +37,20 @@ The support for CDs and DVDs with isoburn.exe has been added in the recent commi
 C:\Users\JohnDoe\MCSBtool> .\mcsb.ps1 -BIOS "UEFI" -ISOImage "C:\Users\JohnDoe\images\Windows11.iso" -DrvPath "C:\Users\JohnDoe\MyDrivers\" -USBPath "F:\"
 ```
 
-# UEFI/NTFS/exFAT Support
+# Extended file system support on UEFI systems
 Extended UEFI support is a major change that has been added in the commit _[7f13f7](https://github.com/poireguy/MCSBtool/commit/7f13f703a8c1625ab0a861c866b59e62f46ba2ed)_.
 A re-formatted optical disc image (copied over from Rufus's FAT12 .img file) has been added to the root of the repository; you can install this with the script in case of offline media creation.
 
 # Work In Progress and new potential features
 I am planning to add these things to commit(s) for the _MCSB Tool_ PowerShell script:
-- Add a file size check for install.wim on the mounted ISO drive BEFORE the copying files step, but only if the USB is formatted as FAT32. If over 4 GiB (or simplify to 3.7 GiB) was verified as the file size from the UDF-mounted drive, prompt to split the file into 2-3 versions (mounted drives are only read, so prompt the user for a directory to store these files temporarily and then proceed to write these after the copying process by deleting install.wim, if *.swm is present in %TMP% and copy these .swm files to **USB**:\sources\. This might be an extensive process with DISM.exe
+- Add a file size check for install.wim on the mounted ISO drive BEFORE the copying files step, but only if the USB is formatted as FAT32. If over 4 GiB (or simplify to 3.7 GiB) was verified as the file size from the UDF-mounted drive, prompt to split the file into 2-3 versions (mounted drives are only read, so prompt the user for a directory to store these files temporarily and then proceed to write these after the copying process by deleting install.wim, if *.swm is present in %TMP% and copy these .swm files to **USB**:\sources\. This might be an extensive process with DISM.exe. However, this idea has not worked in beta testing.
+
+# Q&A
+1. Will you add a GUI version?
+2. No, I will not add a GUI version, as simplicity is intended.
+
+3. Will there be Linux or Mac versions?
+4. This script is intended for support on Microsoft Windows. You can use a container or virtual machine to use this tool and proceed forward. This is because the use of PowerShell and system functions is built in and used by Windows.
+
+5. What about Windows Vista and below?
+6. For legacy versions where PowerShell is not installed by default, it is recommended to install it in order to use this script.
