@@ -159,8 +159,8 @@ if (Test-Path $Drive) {
             Log "BIOS scheme: $BIOS"
 
             if ($BIOS.ToUpper() -eq "UEFI") {
-
-                bootsect.exe /$code ${Drive} /force
+                $BootArgs = "/$code", "$Drive", "/force"
+                Start-Process -FilePath bootsect.exe -ArgumentList $BootArgs -Verb RunAs -Wait
                 $EFID = Join-Path -Path "$PSScriptRoot" -ChildPath "EFI"
                 $ActualDriver = Join-Path -Path "$EFID" -ChildPath "uefi-ntfs.iso"
                 Write-Host "Fetching online UEFI:NTFS and other driver patches, please wait..." -ForegroundColor Cyan
@@ -246,4 +246,5 @@ exit
     Log "Drive not found at ${Drive}\"
     pause
 }
+
 
