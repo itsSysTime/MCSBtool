@@ -36,6 +36,19 @@ The support for CDs and DVDs with isoburn.exe has been added in the recent commi
 ```PowerShell
 C:\Users\JohnDoe\MCSBtool> .\mcsb.ps1 -BIOS "UEFI" -ISOImage "C:\Users\JohnDoe\images\Windows11.iso" -DrvPath "C:\Users\JohnDoe\MyDrivers\" -USBPath "F:\"
 ```
+# Manual steps you can execute to perform a similar effect
+In order is where you perform these steps. However, this process assumes you have acknowledged:
+- Size of Install.WIM file inside of a mounted ISO file before copying files, FAT32 is recommended if the file is below ~3.7 GiB
+- Size of your drive (CD/DVD/USB, USBs are recommended for modern installations, while DVDs are recommended for legacy versions. Vista works on USB installs, but below may require a DVD. CDs cannot hold a modern or pre-modern installation. Floppy support is unknown.)
+- Version of OS to install. The process assumes you acknowledge what you need to install the OS. Check online for more information!
+- ISO or optical disc image file. The process assumes you have this to proceed.
+
+Now, you can proceed with the steps in the specified order:
+1. Mount your image file
+2. Copy the files inside the newly mounted virtual drive to your USB/CD/DVD drive.
+3. Make sure your information is correct. The disk scheme and firmware are also detailed for more legacy OSes. GPT and legacy BIOS are not natively compatible, as well as MBR and UEFI.
+4. Finally, set boot information such as boot entries, boot code (for Windows), and other vital information based on your operating system and system type.
+
 
 # Extended file system support on UEFI systems
 Extended UEFI support is a major change that has been added in the commit _[7f13f7](https://github.com/poireguy/MCSBtool/commit/7f13f703a8c1625ab0a861c866b59e62f46ba2ed)_.
