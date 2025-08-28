@@ -22,7 +22,7 @@ This tool was primarily designed for PowerShell due to its efficiency.
 Credit to me (Poireguy), yippee!
 
 # Extras
-Adding custom drivers has been implemented; you're welcome! `$WinPEDriver$` path has been added to automatically mount or load drivers on WinPE/Setup boot.
+Adding custom drivers has been implemented; you're welcome! `$WinPEDriver$` path has been added to automatically mount or load drivers on WinPE/Setup boot. Windows Vista and below do not support this method and require manual driver loading into the base image or installing drivers after the setup process. Sorry!
 <br>More parameters, but these parameters are optional.
 
 Let your .inf, .sys, and .cat files join the installation. Sure, you can also implement the
