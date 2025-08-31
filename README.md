@@ -8,7 +8,7 @@ This tool uses three main steps to ensure your bootable media is prepared for in
 3. Set Boot, the final step, sets your external media boot configuration and others to ensure you can boot into the flash drive or SSD.
 
 ## Format your USB drive accordingly
-Due to Windows Image (.WIM) and .ESD sizes in ISOs, some USBs will be formatted accordingly. With smaller _D:\sources\install.wim_ (replace D:\ with your USB letter) or **install.esd** sizes, you should format the partition as FAT32 for compatibility between UEFI and Legacy BIOS (MBR). For larger images up to **4 Gigabytes** and above, format the drive as _NTFS_ to ensure your USB drive can boot properly with modern systems and space for your .WIM or .ESD image. I encourage formatting USB drives as so, according to OS; image sizes can vary with editions and versions.
+Due to Windows Image (.WIM) and .ESD sizes in ISOs, some USBs will be formatted accordingly. With smaller _D:\sources\install.wim_ (replace D:\ with your USB letter) or **install.esd** sizes, you should format the partition as FAT32 for compatibility between UEFI and Legacy BIOS (MBR). For larger images up to **4 Gigabytes** and above, format the drive as _NTFS_ to ensure your USB drive can boot properly with modern systems and space for your .WIM or .ESD image. I encourage formatting USB drives as so, according to the OS; image sizes can vary with editions and versions.
 
 | OS                      | Format As |
 |-------------------------|-----------|
@@ -22,7 +22,7 @@ This tool was primarily designed for PowerShell due to its efficiency.
 Credit to me (Poireguy), yippee!
 
 # Extras
-Adding custom drivers has been implemented; you're welcome! `$WinPEDriver$` path has been added to automatically mount or load drivers on WinPE/Setup boot. Windows Vista and below do not support this method and require manual driver loading into the base image or installing drivers after the setup process. Sorry!
+Adding custom drivers has been implemented; you're welcome! `$WinPEDriver$` path has been added to automatically load drivers on WinPE/Setup boot. Windows Vista and below do not support this method and require manual driver loading into the base image or installing drivers after the setup process. Sorry!
 <br>More parameters, but these parameters are optional.
 
 Let your .inf, .sys, and .cat files join the installation. Sure, you can also implement the
@@ -51,6 +51,32 @@ Now, you can proceed with the steps in the specified order:
 3. Make sure your information is correct. The disk scheme and firmware are also detailed for more legacy OSes. GPT and legacy BIOS are not natively compatible, as well as MBR and UEFI.
 4. Finally, set and apply boot information such as boot entries, boot code (for Windows), and other vital information based on your operating system and system type.
 
+Regarding drivers, if you cannot run an installer for the driver(s) you need for Windows, you can also use _PnP Utility_ (`pnputil.exe`) or _Windows Driver Kit_ (also known as **WDK**). You should find a version that supports the intended operating system version in the table below (_Driver Development Kit / Device Development Kit_ included):
+
+| OS                      | WDK Version(s) | Note(s)
+|-------------------------|-----------|
+| Windows Vista, XP SP3/later, 7 SP1, Server 2008 & R2, Server 2003 SP1/later & x64 Editions | WDK 7.1.0 | Outdated and no longer available from Microsoft. Required to build for these versions.
+| Windows 2000 | Windows 2000 DDK | Outdated and no longer available from Microsoft.
+| Windows 7, 8, 8.1, Server 2012, Server 2016, 10, 11, Server 2022, Server 2019 | WDK 10.0 | The latest WDK 10.0 releases are bundled with the Windows SDK, which are also compatible with Visual Studio 2022. You must have WDK 10.0.19041.0 or an earlier version to build drivers for Windows 7, 8, or 8.1, unless you have manually configured it for later versions of WDK 10.0. Visual Studio 2019 or older may be required for WDK 10.0.19041.0 or earlier versions.
+| Windows 11, Server 2025 | WDK 11.0 | Requires Visual Studio 2022 and can build for versions of Windows 10 and later, including Windows Server 2016, 2019, and 2025. It does not support building drivers for versions earlier than Windows 10. Microsoft recommends using the latest WDK version for the corresponding version(s) of Windows.
+
+Using `pnputil.exe`, you can run (e.g.):
+```Batch
+pnputil.exe -i -a C:\Users\JaneDoe\drivers\*.inf
+```
+The command above adds driver packages to the store and installs them for an existing device with the Hardware ID provided in the .inf files (in versions below Windows 10, refined commands introduced in various versions).
+
+For Windows 10 and above, you can use:
+```Batch
+pnputil.exe /add-driver C:\Users\JaneDoe\drivers\*.inf /install
+```
+
+When using **DevCon**, you must first find the Hardware ID of the device listed in the .inf file that comes with your .cat and/or .sys file(s) by viewing it in other software such as Notepad. Once you find it, copy it, and you can use the command below (example) to install a driver:
+```Batch
+devcon.exe install C:\Users\NotDoe\drvpack\ATIx64\wddmAMDRHD.inf [Device hardware ID here]
+```
+
+You can replace `install` with `update` in the command to update an existing driver. You should use the hardware ID found in the device's details tab in Device Manager to update with DevCon.
 
 # Extended file system support on UEFI systems
 Extended UEFI support is a major change that has been added in the commit _[7f13f7](https://github.com/poireguy/MCSBtool/commit/7f13f703a8c1625ab0a861c866b59e62f46ba2ed)_.
@@ -68,4 +94,4 @@ I am planning to add these things to commit(s) for the _MCSB Tool_ PowerShell sc
 4. This script is intended for support on Microsoft Windows. You can use a container or virtual machine to use this tool and proceed forward. This is because the use of PowerShell and system functions is built in and used by Windows.
 
 5. What about Windows Vista and below?
-6. For legacy versions where PowerShell is not installed by default, it is recommended to install it in order to use this script.
+6. For legacy versions where PowerShell is not installed by default, it is recommended to install it to use this script.
