@@ -41,7 +41,7 @@ In order is where you perform these steps. However, this process assumes you hav
 - Size of Install.WIM file inside of a mounted ISO file before copying files, FAT32 is recommended if the file is below ~3.7 GiB
 - Size of your drive (CD/DVD/USB, USBs are recommended for modern installations, while DVDs are recommended for legacy versions. Vista works on USB installs, but below may require a DVD. CDs cannot hold a modern or pre-modern installation. Floppy support is unknown.)
 - Version of OS to install. The process assumes you acknowledge what you need to install the OS. Check online for more information!
-- ISO or optical disc image file. The process assumes you have this to proceed.
+- ISO or optical disc image file. The process simply assumes you have this to proceed.
 
 Because of the script's intended view on Microsoft Windows, manual steps may need to be performed for other OSes.
 
@@ -54,7 +54,7 @@ Now, you can proceed with the steps in the specified order:
 Regarding drivers, if you cannot run an installer for the driver(s) you need for Windows, you can also use _PnP Utility_ (`pnputil.exe`) or _Windows Driver Kit_ (also known as **WDK**). You should find a version that supports the intended operating system version in the table below (_Driver Development Kit / Device Development Kit_ included):
 
 | OS                      | WDK Version(s) | Note(s)
-|-------------------------|-----------|
+|-------------------------|----------------|---------
 | Windows Vista, XP SP3/later, 7 SP1, Server 2008 & R2, Server 2003 SP1/later & x64 Editions | WDK 7.1.0 | Outdated and no longer available from Microsoft. Required to build for these versions.
 | Windows 2000 | Windows 2000 DDK | Outdated and no longer available from Microsoft.
 | Windows 7, 8, 8.1, Server 2012, Server 2016, 10, 11, Server 2022, Server 2019 | WDK 10.0 | The latest WDK 10.0 releases are bundled with the Windows SDK, which are also compatible with Visual Studio 2022. You must have WDK 10.0.19041.0 or an earlier version to build drivers for Windows 7, 8, or 8.1, unless you have manually configured it for later versions of WDK 10.0. Visual Studio 2019 or older may be required for WDK 10.0.19041.0 or earlier versions.
