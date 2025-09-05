@@ -81,15 +81,16 @@ Extended UEFI support is a major change that has been added in the commit _[7f13
 A re-formatted optical disc image (copied over from Rufus's FAT12 .img file since many modern and even pre-modern systems cannot mount 70s-80s era file systems, et cetera.) has been added to the root of the repository; you can install this with the script in case of offline media creation. The script also assumes you have at least 272 MiB free of unallocated space on the same disk as the USB/CD/DVD's partition, where the boot files only use 1-3 MiB of space. You may use your minimum allowed partition size for this, so prepare this partition manually.
 
 # Work In Progress and new potential features
-I am planning to add these things to commit(s) for the _MCSB Tool_ PowerShell script:
-- Add a file size check for install.wim on the mounted ISO drive BEFORE the copying files step, but only if the USB is formatted as FAT32. If over 4 GiB (or simplify to 3.7 GiB) was verified as the file size from the UDF-mounted drive, prompt to split the file into 2-3 versions (mounted drives are only read, so prompt the user for a directory to store these files temporarily and then proceed to write these after the copying process by deleting install.wim, if *.swm is present in %TMP% and copy these .swm files to **USB**:\sources\. This might be an extensive process with DISM.exe. However, this idea has not worked in beta testing and was actually scrapped.
+This script is a work in progress.
+## Failed ideas
+- Smart file system formatting. Add a file size check for install.wim on the mounted ISO drive BEFORE the copying files step, but only if the USB is formatted as FAT32. If over 4 GiB (or simplify to 3.7 GiB) was verified as the file size from the UDF-mounted drive, prompt to split the file into 2-3 versions (mounted drives are only read, so prompt the user for a directory to store these files temporarily and then proceed to write these after the copying process by deleting install.wim, if *.swm is present in %TMP% and copy these .swm files to **USB**:\sources\. This might be an extensive process with DISM.exe. However, this idea has not worked in beta testing and was actually scrapped.
 
 # Q&A
 1. Will you add a GUI version?
 2. No, I will not add a GUI version, as simplicity is intended.
 
 3. Will there be Linux or Mac versions?
-4. This script is intended for support on Microsoft Windows. You can use a container or virtual machine to use this tool and proceed forward. This is because the use of PowerShell and system functions is built in and used by Windows.
+4. This script is intended for support on Microsoft Windows. You can use a container or a virtual machine to use this tool and proceed forward. This is because the use of PowerShell and system functions is built in and used by Windows.
 
 5. What about Windows Vista and below?
 6. For legacy versions where PowerShell is not installed by default, it is recommended to install it to use this script.
