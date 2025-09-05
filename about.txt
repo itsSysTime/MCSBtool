@@ -1,5 +1,5 @@
-# THIS IS AN ABOUT FILE USED FOR GITHUB/PUBLIC INDEXING AND OTHER DESCRIPTION INFORMATION. SEE THE README FOR A MORE DETAILED LOOK ON THE REPOSITORY.
-# Created by Poireguy, named MCSBTool.
+# THIS IS AN ABOUT FILE USED FOR GITHUB/PUBLIC INDEXING AND OTHER DESCRIPTION INFORMATION. SEE THE README FOR A MORE DETAILED LOOK AT THE REPOSITORY.
+# Created by itsSysTime, named MCSBTool.
 
 [KEYWORDS]:
 PowerShell Automation
@@ -9,14 +9,14 @@ UEFI/BIOS Support with Removable Media
 
 [CURATED TO]:
 Operating System - Microsoft Windows (MAY NOT WORK WITH VERSIONS WHERE POWERSHELL IS NOT INSTALLED. IF NOT, MANUALLY INSTALL POWERSHELL BEFOREHAND.)
-Removable Media - CDROM and Optical Discs (CD, DVD, BLU-RAY, USB, et cetera)
+Removable Media - CD-ROM and Optical Discs (CD, DVD, BLU-RAY, USB, et cetera)
 Optical disc images - ISO or other format
 
 [KNOWN ISSUES]:
 Removable Media support on older OSes - On legacy systems (such as below Vista), preparing a USB can be more difficult. However, an optical disc (CD/DVD) is recommended for versions below Build 6000 (Windows Vista SP0, Build 6000, NT 6.0)
 
 [AUTHORS]:
-Poireguy, 2025
+itsSysTime, 2025
 
 [USE OF OTHER WORK]:
 Yes, the script uses the Rufus UEFI:NTFS drivers. They are re-formatted from the Rufus "uefi-ntfs.img" FAT12, but reformatted to an ISO image for compatibility.
