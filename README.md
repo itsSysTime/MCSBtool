@@ -18,11 +18,9 @@ Due to Windows Image (.WIM) and .ESD sizes in ISOs, some USBs will be formatted 
 # What is the coding language of this tool?
 This tool was primarily designed for PowerShell due to its efficiency.
 
-# Credits
-Credit to me (Poireguy), yippee!
 
 # Extras
-Adding custom drivers has been implemented; you're welcome! `$WinPEDriver$` path has been added to automatically load drivers on WinPE/Setup boot. Windows Vista and below do not support this method and require manual driver loading into the base image or installing drivers after the setup process. Sorry!
+Adding custom drivers has been implemented; you're welcome! `$WinPEDriver$` path has been added to load drivers on WinPE/Setup boot automatically. Windows Vista and below do not support this method and require manual driver loading into the base image or installing drivers after the setup process. Sorry!
 <br>More parameters, but these parameters are optional.
 
 Let your .inf, .sys, and .cat files join the installation. Sure, you can also implement the
