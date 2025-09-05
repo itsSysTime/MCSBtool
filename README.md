@@ -48,7 +48,7 @@ Because of the script's intended view on Microsoft Windows, manual steps may nee
 Now, you can proceed with the steps in the specified order:
 1. Mount your image file
 2. Copy the files inside the newly mounted virtual drive to your USB/CD/DVD drive.
-3. Make sure your information is correct. The disk scheme and firmware are also detailed for more legacy OSes. GPT and legacy BIOS are not natively compatible, as well as MBR and UEFI.
+3. Make sure your information is correct. The disk scheme and firmware are also detailed for more legacy OSes. GPT and legacy BIOS are not natively compatible, including MBR and UEFI firmware.
 4. Finally, set and apply boot information such as boot entries, boot code (for Windows), and other vital information based on your operating system and system type.
 
 Regarding drivers, if you cannot run an installer for the driver(s) you need for Windows, you can also use _PnP Utility_ (`pnputil.exe`) or _Windows Driver Kit_ (also known as **WDK**). You should find a version that supports the intended operating system version in the table below (_Driver Development Kit / Device Development Kit_ included):
@@ -76,11 +76,11 @@ When using **DevCon**, you must first find the Hardware ID of the device listed 
 devcon.exe install C:\Users\NotDoe\drvpack\ATIx64\wddmAMDRHD.inf [Device hardware ID here]
 ```
 
-You can replace `install` with `update` in the command to update an existing driver. You should use the hardware ID found in the device's details tab in Device Manager to update with DevCon.
+You can replace `install` with `update` in the command to update an existing driver. You should use the hardware ID found in the device's details tab in Device Manager to update it with DevCon.
 
 # Extended file system support on UEFI systems
 Extended UEFI support is a major change that has been added in the commit _[7f13f7](https://github.com/poireguy/MCSBtool/commit/7f13f703a8c1625ab0a861c866b59e62f46ba2ed)_.
-A re-formatted optical disc image (copied over from Rufus's FAT12 .img file) has been added to the root of the repository; you can install this with the script in case of offline media creation. The script also assumes you have at least 272 MiB free of unallocated space on the same disk as the USB/CD/DVD's partition, where the boot files only use 1-3 MiB of space. You may use your minimum allowed partition size for this, so prepare this partition manually.
+A re-formatted optical disc image (copied over from Rufus's FAT12 .img file since many modern and even pre-modern systems cannot mount 70s-80s era file systems, et cetera.) has been added to the root of the repository; you can install this with the script in case of offline media creation. The script also assumes you have at least 272 MiB free of unallocated space on the same disk as the USB/CD/DVD's partition, where the boot files only use 1-3 MiB of space. You may use your minimum allowed partition size for this, so prepare this partition manually.
 
 # Work In Progress and new potential features
 I am planning to add these things to commit(s) for the _MCSB Tool_ PowerShell script:
