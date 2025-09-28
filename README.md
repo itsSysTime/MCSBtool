@@ -34,14 +34,16 @@ The support for CDs and DVDs with isoburn.exe has been added in the recent commi
 ```PowerShell
 C:\Users\JohnDoe\MCSBtool> .\mcsb.ps1 -BIOS "UEFI" -ISOImage "C:\Users\JohnDoe\images\Windows11.iso" -DrvPath "C:\Users\JohnDoe\MyDrivers\" -USBPath "F:\"
 ```
+
 # Manual steps you can execute to perform a similar effect
 In order is where you perform these steps. However, this process assumes you have acknowledged:
 - Size of Install.WIM file inside of a mounted ISO file before copying files, FAT32 is recommended if the file is below ~3.7 GiB
-- Size of your drive (CD/DVD/USB, USBs are recommended for modern installations, while DVDs are recommended for legacy versions. Vista works on USB installs, but below may require a DVD. CDs cannot hold a modern or pre-modern installation. Floppy support is unknown.)
-- Version of OS to install. The process assumes you acknowledge what you need to install the OS. Check online for more information!
+- Size of your drive (CD/DVD/USB, USBs are recommended for modern installations, while DVDs are recommended for legacy versions. Windows Vista works on USB installs, but below may require a DVD. CDs cannot hold a modern or pre-modern installation. Floppy support is unknown.)
+- Version of OS to install. The process assumes you acknowledge what you need to install the OS. Check online for more information! _Windows Server 2003 R2_, _Windows Server 2003_, _Windows XP_, and below require the **NT52/NT51** bootloader, which used the legacy **NTLDR (NT Loader)** bootloader, while versions _Windows Vista_ and above require the **NT60** bootloader, introduced with the kernel version **Windows NT 6.0**. Fun fact, _Windows NT 6.0_ refers to **Windows Vista**. 
 - ISO or optical disc image file. The process simply assumes you have this to proceed.
 
 Because of the script's intended view on Microsoft Windows, manual steps may need to be performed for other OSes.
+
 
 Now, you can proceed with the steps in the specified order:
 1. Mount your image file
