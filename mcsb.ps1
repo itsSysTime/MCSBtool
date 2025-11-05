@@ -66,6 +66,7 @@ if ($MyInvocation.BoundParameters.ContainsKey('USBPath')) {
 Welcome to the Automated MCS/MCSB Tool for creating bootable media.
 To get started, please enter the drive letter to your USB or other insertable device (e.g., R:\)
 "@
+    $Drive = $Drive.TrimEnd('\')
 }
 
 Write-Host "`nVerifying drive, please wait..." -ForegroundColor Cyan
@@ -77,7 +78,11 @@ if (-not $Drive) {
     exit 1
 }
 
-if (Test-Path $Drive) {
+$DriveInfo = Get-CimInstance Win32_LogicalDisk | Where-Object { $_.DeviceID -eq $Drive }
+$CDInfo = Get-CimInstance Win32_CDROMDrive | Where-Object { $_.Drive -eq $Drive }
+
+if ($DriveInfo -or $CDInfo -or (Test-Path $Drive)) {
+
     cls
 
     if ($MyInvocation.BoundParameters.ContainsKey('ISOPath')) {
@@ -85,13 +90,24 @@ if (Test-Path $Drive) {
     } else {
         $Image = Read-Host "Please enter the full path to your optical disk image"
     }
+	
+    if ($CDInfo) {
+		if ($CDInfo.MediaLoaded -ne $true) {
+			Write-Host "No disc inserted in $Drive." -ForegroundColor Red
+			return
+		}
+		$IsCD = $true
+	} else {
+		$IsCD = $false
+	}
 
+	
     Log "ISO input: $Image"
 
     if (Test-Path $Image) {
         try {
             $DriveInfo = Get-CimInstance -ClassName Win32_LogicalDisk | Where-Object { $_.DeviceID -eq $Drive }
-            If ($DriveInfo.DriveType -ne 5) {
+            If ($IsCD -eq $false) {
                 Log "Attempting to mount ISO..."
                 $Mount = Mount-DiskImage -ImagePath "$Image" -PassThru
                 $DriveLtr = ($Mount | Get-Volume).DriveLetter
@@ -110,7 +126,7 @@ if (Test-Path $Drive) {
             
 
             cls
-            If ($DriveInfo.DriveType -ne 5) {
+            If ($IsCD -eq $false) {
                 Write-Host "Copying files, please wait..." -ForegroundColor Cyan
                 $xcopyArgs = "${DriveLtr}:\* ${Drive}\* /H /E /F /J"
                 Log "xcopy args: $xcopyArgs"
@@ -119,14 +135,20 @@ if (Test-Path $Drive) {
                 Remove-Item temp.txt -Force
                 Start-Sleep -Seconds 5
                 cls
-            } elseif ($DriveInfo.DriveType -eq 5) {
+            } elseif ($IsCD -eq $true) {
                 Write-Host "Burning to CD/DVD, please wait..." -ForegroundColor Yellow
-                $ibargs = "/d ${Drive} ${Image}"
+                $ibargs = "/Q ${Drive} ${Image}"
                 Start-Process isoburn.exe -ArgumentList $ibargs -NoNewWindow -RedirectStandardOutput temp.txt -Wait
                 Get-Content temp.txt | ForEach-Object { Write-Host $_ -ForegroundColor Yellow }
                 Remove-Item temp.txt -Force
                 Start-Sleep -Seconds 5
                 cls
+                $ex = Read-Host "Would you like to stop here? (Y/N)"
+                if ($ex.ToUpper() -eq "Y") {
+                    exit
+                } else {
+                    Write-Host "The script will continue..." -ForegroundColor Green
+                }
             }
 
                 $DrvIn = Read-Host "Would you like to install drivers? (Y/N)"
@@ -159,8 +181,8 @@ if (Test-Path $Drive) {
             Log "BIOS scheme: $BIOS"
 
             if ($BIOS.ToUpper() -eq "UEFI") {
-                $bsect = Join-Path "$Drive" "Boot" "bootsect.exe"
-                $bsect /$code ${Drive} /mbr /force
+                $BootArgs = "/$code", "$Drive", "/force"
+                Start-Process -FilePath bootsect.exe -ArgumentList $BootArgs -Verb RunAs -Wait
                 $EFID = Join-Path -Path "$PSScriptRoot" -ChildPath "EFI"
                 $ActualDriver = Join-Path -Path "$EFID" -ChildPath "uefi-ntfs.iso"
                 Write-Host "Fetching online UEFI:NTFS and other driver patches, please wait..." -ForegroundColor Cyan
@@ -208,8 +230,7 @@ exit
                 Write-Host "$RoboCon" -ForegroundColor Yellow
 
             } elseif ($BIOS.ToUpper() -eq "BIOS") {
-                $bsect = Join-Path "$Drive" "Boot" "bootsect.exe"
-                $bsect /$code ${Drive} /mbr /force
+                bootsect.exe /$code ${Drive} /mbr /force
                 $volnum = (Get-Volume -DriveLetter $Drive | Get-Partition).PartitionNumber
                 $diskpartScript = @"
 select volume $volnum
@@ -247,6 +268,5 @@ exit
     Log "Drive not found at ${Drive}\"
     pause
 }
-
 
 
